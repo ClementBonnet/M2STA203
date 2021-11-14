@@ -42,7 +42,7 @@ bike$nbv <- as.numeric(bike$Rented.Bike.Count)
 epi.descriptives(bike$nbv)
 
 
-# ========== Cr?ation de nouvelles variables ========== #
+# ========== Création de nouvelles variables ========== #
 
 # Variable dichotomique de pluie
 bike$rain <- ifelse(bike$Rainfall.mm. == 0, 0, 1)
@@ -113,14 +113,11 @@ summary(uniSeasons)
 Corr <- cor(sapply(bike,as.numeric), use = "pairwise.complete.obs", method = "spearman")
 corrplot::corrplot(Corr, method = "square", type = "upper", tl.col = "black")
 
-
-
-# ========== Dispersion ========== #
+# ==========  ========== #
 
 moyenne <- mean(bike$Rented.Bike.Count)
 variance <- var(bike$Rented.Bike.Count)
 variance_corr <- var(bike$Rented.Bike.Count) * (nrow(bike)-1)/nrow(bike)
-
 
 # ========== Modèles de Poisson complets ========== #
 
@@ -145,9 +142,9 @@ poisson5 <- glm(Rented.Bike.Count ~ Hour + Temperature..C. + Humidity... + Wind.
 summary(poisson5)
 
 
-# ========== Calcul pour savoir si faire Quasi-Poisson ========== #
+# ========== Quasi-Poisson ? ========== #
 
-# Le rapport doit ?tre proche de 1 pour pouvoir utiliser poisson
+dispersiontest(poisson1)
 
 quasioupas <- function(modele){
   return(sum(((bike$Rented.Bike.Count - modele$fitted.values)^2) / modele$fitted.values))
@@ -155,7 +152,7 @@ quasioupas <- function(modele){
 
 quasioupas(poisson1)
 
-# ========== Mod?les de Quasi-Poisson ========== #
+# ========== Modèle de Quasi-Poisson ========== #
 
 quasi4 <- glm(Rented.Bike.Count ~ Hour + I(Temperature..C./10) + I(Humidity.../10) + Wind.speed..m.s. + Visibility..10m. + Solar.Radiation..MJ.m2. + rain + I(Snowfall..cm./5) + Holiday + Functioning.Day + Seasons, family = quasipoisson, data = bike)
 summary(quasi4)
@@ -164,7 +161,7 @@ round(cbind(exp(coef(quasi4)),exp(confint.default(quasi4))),2)
 drop1(quasi4, test="Chisq")
 
 
-# ========== Mod?les Binomiaux n?gatifs ========== #
+# ========== Modèle Binomial négatif ========== #
 
 nb4 <- glm.nb(Rented.Bike.Count ~ Hour + Temperature..C. + Humidity... + Wind.speed..m.s. + Visibility..10m. + Solar.Radiation..MJ.m2. + rain + Snowfall..cm. + Holiday + Functioning.Day + Seasons, data = bike)
 summary(nb4)
